@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    /* Language and Environment */
+    "target": "ES2020",
+    /* Modules */
+    "module": "NodeNext",
+    "rootDir": "src",
+    "moduleResolution": "NodeNext",
+
+    "outDir": "dist",
+
+    // "mapRoot": "",
+    "sourceMap": true,
+
+    "esModuleInterop": true,
+
+    "forceConsistentCasingInFileNames": true,
+
+    /* Type Checking */
+    "strict": true,
+
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*", "src/db"],
+  "exclude": ["node_modules", "dist", "build", "coverage", "scripts", "test"]
+}
