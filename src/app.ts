@@ -51,7 +51,7 @@ import router from "./routes/index.js";
   
   const start = async (url: string, port: number) => {
     try {
-      await connectToDatabase(url);
+      // await connectToDatabase(url);
       app.listen(port, () => {
         console.log(`server is running on port ${port}`);
       });

@@ -1,4 +1,6 @@
 import express, { Request, Response } from "express";
+import multer from "multer";
+import { UploadImages } from "../IMAGES/Uploads/index.js";
 // import { registerUser } from "../Controllers/auth/Signup.js";
 // import { loginUser } from "../Controllers/auth/login.js";
 // import { getAllUsers } from "../Controllers/users/getAllUsers.js";
@@ -8,7 +10,8 @@ import express, { Request, Response } from "express";
 // import deleteUser from "../Controllers/users/deleteUsers.js";
 
 const router=express.Router();
-
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 router.get("/api", (req:Request, res:Response) => {
     res.send("api working succesful!");
   });
@@ -17,5 +20,10 @@ router.get("/api", (req:Request, res:Response) => {
 //   router.post("/api/auth/login", loginUser);
 //   router.route('/api/users/').get(getAllUsers);
 //   router.route('/api/users/:id').get(getSingleUser).patch(authenticateToken,UpdateUser).delete(authenticateToken,deleteUser)
+
+
+
+// images
+router.post('/api/uploadImages/',upload.array('images'),UploadImages)
 
   export default  router
