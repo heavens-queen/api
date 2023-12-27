@@ -1,19 +1,12 @@
-import express, { Request, Response, NextFunction } from 'express';
+import{ Request, Response, NextFunction } from 'express';
 import sharp from 'sharp';
-import multer from 'multer';
-import { S3Client, PutObjectCommandInput, PutObjectCommand } from '@aws-sdk/client-s3';
+import {s3} from '../../config/s3Config.js';
+import { PutObjectCommandInput, PutObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
+import { config } from "dotenv";
+config();
 
-const s3 = new S3Client({
-  region: 'YOUR_AWS_REGION',
-  credentials: {
-    accessKeyId: 'YOUR_ACCESS_KEY',
-    secretAccessKey: 'YOUR_SECRET_KEY',
-  },
-});
 
-const app = express();
-const port = 3000;
 
 
 
@@ -78,7 +71,7 @@ export const UploadImages= async (req: Request, res: Response, next: NextFunctio
         // Process the image and upload to S3
         const processedImageBuffer = await sharpInstance.toBuffer();
         const uploadParams: PutObjectCommandInput = {
-          Bucket: `YOUR_S3_BUCKET_NAME/${userId}`, // Use the user's ID as a subfolder
+          Bucket: `${process.env.BUCKET_NAME}/${userId}`, // Use the user's ID as a subfolder
           Key: `images/${imageId}.${format}`, // Use the generated ID as the image filename
           Body: processedImageBuffer,
         };
@@ -88,7 +81,7 @@ export const UploadImages= async (req: Request, res: Response, next: NextFunctio
         // Create and upload a thumbnail
         const thumbnailBuffer = await sharpInstance.resize(100, 100).toBuffer();
         const thumbnailParams: PutObjectCommandInput = {
-          Bucket: `YOUR_S3_BUCKET_NAME/${userId}`, // Use the user's ID as a subfolder
+          Bucket: `${process.env.BUCKET_NAME}/${userId}`, // Use the user's ID as a subfolder
           Key: `thumbnails/${imageId}.${format}`, // Use the generated ID as the thumbnail filename
           Body: thumbnailBuffer,
         };
@@ -98,8 +91,8 @@ export const UploadImages= async (req: Request, res: Response, next: NextFunctio
         return {
           imageId,
           originalName: file.originalname,
-          imageUrl: `YOUR_S3_BUCKET_URL/${userId}/images/${imageId}.${format}`,
-          thumbnailUrl: `YOUR_S3_BUCKET_URL/${userId}/thumbnails/${imageId}.${format}`,
+          imageUrl: `http://${process.env.BUCKET_NAME}.s3-${process.env.REGION}.amazonaws.com/${userId}/images/${imageId}.${format}`,
+          thumbnailUrl: `http://${process.env.BUCKET_NAME}.s3-${process.env.REGION}.amazonaws.com/${userId}/thumbnails/${imageId}.${format}`,
         };
       })
     );
@@ -110,6 +103,4 @@ export const UploadImages= async (req: Request, res: Response, next: NextFunctio
   }
 }
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+
