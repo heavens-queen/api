@@ -5,6 +5,9 @@ import {
 } from "@aws-sdk/client-s3";
 import { s3 } from "../../config/s3Config.js";
 import { NextFunction, Request, Response } from "express";
+import { listObjectsWithPrefix } from "./helper/SinglePrefixObjects.js";
+import { listObjectsWithPrefixBatch } from "./helper/ObjectsWithPrefixBatch.js";
+
 export async function deleteImageAndThumbnail(
     req: Request,
     res: Response,
@@ -14,11 +17,17 @@ export async function deleteImageAndThumbnail(
     const { imageId, imageIds } = req.body;
   
     // Validate userId
-    if (!userId) return res.status(400).json({ error: 'Missing userId. Please navigate to your profile and retrieve your userId' });
+    if (!userId) {
+      return res.status(400).json({
+        error: "Missing userId. Please navigate to your profile and retrieve your userId",
+      });
+    }
   
     // Validate imageId or imageIds
     if (!imageId && (!imageIds || !Array.isArray(imageIds))) {
-      return res.status(400).json({ error: "Missing Image ID or invalid imageIds" });
+      return res.status(400).json({
+        error: "Missing Image ID or invalid imageIds",
+      });
     }
   
     try {
@@ -26,11 +35,31 @@ export async function deleteImageAndThumbnail(
         const imagePrefix = `${userId}/images/${imageId}`;
         const thumbnailPrefix = `${userId}/images/thumbnails/${imageId}`;
   
-        // Delete all images and thumbnails
+        // List objects with the specified prefixes
+        const imageKeys = await listObjectsWithPrefix(
+          process.env.BUCKET_NAME || "",
+          imagePrefix
+        );
+        const thumbnailKeys = await listObjectsWithPrefix(
+          process.env.BUCKET_NAME || "",
+          thumbnailPrefix
+        );
+  
+        // Concatenate keys from both prefixes
+        const keysToDelete = [...imageKeys, ...thumbnailKeys];
+  
+        // Check if there are any files to delete
+        if (keysToDelete.length === 0) {
+          return res.status(400).json({
+            error: "No files found with the specified prefixes.",
+          });
+        }else{
+
+        // Delete files with the extracted keys
         const deleteParams = {
           Bucket: process.env.BUCKET_NAME || "",
           Delete: {
-            Objects: [{ Key: imagePrefix }, { Key: thumbnailPrefix }],
+            Objects: keysToDelete.map((Key) => ({ Key })),
             Quiet: false,
           },
         };
@@ -39,25 +68,41 @@ export async function deleteImageAndThumbnail(
   
         // Check if any errors occurred during deletion
         if (response.Errors && response.Errors.length > 0) {
+            console.log("Error deleting images from S3 bucket",response.Errors);
           return res.status(400).json({
             error: "Some errors occurred during deletion. Check the Errors array for details.",
             detailedErrors: response.Errors,
           });
         }
-   console.log(response);
+  
         res.json({ success: true, message: "Image deleted successfully" });
-      } else if (imageIds) {
+    }
+      }  else if (imageIds) {
         const Objects: ObjectIdentifier[] = imageIds.flatMap((imageId: any) => {
           const imagePrefix = `${userId}/images/${imageId}`;
           const thumbnailPrefix = `${userId}/images/thumbnails/${imageId}`;
           return [{ Key: imagePrefix }, { Key: thumbnailPrefix }];
         });
   
-        // Delete all images and thumbnails
+        // List objects with the specified prefixes
+        const keysToDelete = await listObjectsWithPrefixBatch(
+          process.env.BUCKET_NAME || "",
+          Objects
+        )||  [];
+  console.log("keys",keysToDelete)
+        // Check if there are any files to delete
+        if (keysToDelete.length === 0) {
+          return res.status(400).json({
+            error: "No files found with the specified prefixes.",
+          });
+        }else{
+                    
+  
+        // Delete files with the extracted keys
         const deleteParams = {
           Bucket: process.env.BUCKET_NAME || "",
           Delete: {
-            Objects,
+            Objects: keysToDelete.map((Key) => ({ Key })),
             Quiet: false,
           },
         };
@@ -66,6 +111,7 @@ export async function deleteImageAndThumbnail(
   
         // Check if any errors occurred during deletion
         if (response.Errors && response.Errors.length > 0) {
+
           return res.status(400).json({
             error: "Some errors occurred during deletion. Check the Errors array for details.",
             detailedErrors: response.Errors,
@@ -73,7 +119,8 @@ export async function deleteImageAndThumbnail(
         }
   
         res.json({ success: true, message: "Images deleted successfully" });
-      }
+        }
+    }
     } catch (error) {
       next(error);
     }
