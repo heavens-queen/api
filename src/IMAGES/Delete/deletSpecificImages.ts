@@ -14,7 +14,7 @@ export async function deleteImageAndThumbnail(
     next: NextFunction
   ) {
     const userId = req.query.userId;
-    const { imageId, imageIds } = req.body;
+    const { key, keys } = req.body;
   
     // Validate userId
     if (!userId) {
@@ -23,17 +23,17 @@ export async function deleteImageAndThumbnail(
       });
     }
   
-    // Validate imageId or imageIds
-    if (!imageId && (!imageIds || !Array.isArray(imageIds))) {
+    // Validate key or keys
+    if (!key && (!keys || !Array.isArray(keys))) {
       return res.status(400).json({
-        error: "Missing Image ID or invalid imageIds",
+        error: "Missing Image ID or invalid keys",
       });
     }
   
     try {
-      if (imageId) {
-        const imagePrefix = `${userId}/images/${imageId}`;
-        const thumbnailPrefix = `${userId}/images/thumbnails/${imageId}`;
+      if (key) {
+        const imagePrefix = `${userId}/images/${key}`;
+        const thumbnailPrefix = `${userId}/images/thumbnails/${key}`;
   
         // List objects with the specified prefixes
         const imageKeys = await listObjectsWithPrefix(
@@ -51,7 +51,7 @@ export async function deleteImageAndThumbnail(
         // Check if there are any files to delete
         if (keysToDelete.length === 0) {
           return res.status(400).json({
-            error: "No files found with the specified prefixes.",
+            error: `No files found with the specified ${key}`
           });
         }else{
 
@@ -75,52 +75,73 @@ export async function deleteImageAndThumbnail(
           });
         }
   
-        res.json({ success: true, message: "Image deleted successfully" });
+        res.json({ success: true, message: "Image and its thumbnail deleted successfully" });
     }
-      }  else if (imageIds) {
-        const Objects: ObjectIdentifier[] = imageIds.flatMap((imageId: any) => {
-          const imagePrefix = `${userId}/images/${imageId}`;
-          const thumbnailPrefix = `${userId}/images/thumbnails/${imageId}`;
+      } else if (keys) {
+        const Objects: ObjectIdentifier[] = keys.flatMap((key: any) => {
+          const imagePrefix = `${userId}/images/${key}`;
+          const thumbnailPrefix = `${userId}/images/thumbnails/${key}`;
           return [{ Key: imagePrefix }, { Key: thumbnailPrefix }];
         });
-  
+      
         // List objects with the specified prefixes
-        const keysToDelete = await listObjectsWithPrefixBatch(
+        const { imageKeysToDelete, thumbnailKeysToDelete } = await listObjectsWithPrefixBatch(
           process.env.BUCKET_NAME || "",
           Objects
-        )||  [];
-  console.log("keys",keysToDelete)
+        );
+        console.log("images",imageKeysToDelete)
+        console.log("thumbnails",thumbnailKeysToDelete)
+      
         // Check if there are any files to delete
-        if (keysToDelete.length === 0) {
+        if (imageKeysToDelete.length === 0 && thumbnailKeysToDelete.length === 0) {
           return res.status(400).json({
-            error: "No files found with the specified prefixes.",
-          });
-        }else{
-                    
-  
-        // Delete files with the extracted keys
-        const deleteParams = {
-          Bucket: process.env.BUCKET_NAME || "",
-          Delete: {
-            Objects: keysToDelete.map((Key) => ({ Key })),
-            Quiet: false,
-          },
-        };
-  
-        const response = await s3.send(new DeleteObjectsCommand(deleteParams));
-  
-        // Check if any errors occurred during deletion
-        if (response.Errors && response.Errors.length > 0) {
-
-          return res.status(400).json({
-            error: "Some errors occurred during deletion. Check the Errors array for details.",
-            detailedErrors: response.Errors,
+            error: `No files found with the specified ${key}`,
           });
         }
-  
-        res.json({ success: true, message: "Images deleted successfully" });
+      
+        // Delete images
+        if (imageKeysToDelete.length > 0) {
+          const imageDeleteParams = {
+            Bucket: process.env.BUCKET_NAME || "",
+            Delete: {
+              Objects: imageKeysToDelete.map((Key) => ({ Key })),
+              Quiet: false,
+            },
+          };
+      
+          const imageResponse = await s3.send(new DeleteObjectsCommand(imageDeleteParams));
+      
+          if (imageResponse.Errors && imageResponse.Errors.length > 0) {
+            return res.status(400).json({
+              error: "Some errors occurred during deletion of images. Check the Errors array for details.",
+              detailedErrors: imageResponse.Errors,
+            });
+          }
         }
-    }
+      
+        // Delete thumbnails
+        if (thumbnailKeysToDelete.length > 0) {
+          const thumbnailDeleteParams = {
+            Bucket: process.env.BUCKET_NAME || "",
+            Delete: {
+              Objects: thumbnailKeysToDelete.map((Key) => ({ Key })),
+              Quiet: false,
+            },
+          };
+      
+          const thumbnailResponse = await s3.send(new DeleteObjectsCommand(thumbnailDeleteParams));
+      
+          if (thumbnailResponse.Errors && thumbnailResponse.Errors.length > 0) {
+            return res.status(400).json({
+              error: "Some errors occurred during deletion of thumbnails. Check the Errors array for details.",
+              detailedErrors: thumbnailResponse.Errors,
+            });
+          }
+        }
+      
+        res.json({ success: true, message: "Images and thumbnails deleted successfully" });
+      }
+      
     } catch (error) {
       next(error);
     }

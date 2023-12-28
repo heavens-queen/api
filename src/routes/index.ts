@@ -2,6 +2,8 @@ import express, { Request, Response } from "express";
 import multer from "multer";
 import { UploadImages } from "../IMAGES/Uploads/index.js";
 import { deleteImageAndThumbnail } from "../IMAGES/Delete/deletSpecificImages.js";
+import { deleteImagesContainer } from "../IMAGES/Delete/destroyImageContainer.js";
+import { deleteUsersFiles } from "../helper/deleteUsersFiles/index.js";
 // import { registerUser } from "../Controllers/auth/Signup.js";
 // import { loginUser } from "../Controllers/auth/login.js";
 // import { getAllUsers } from "../Controllers/users/getAllUsers.js";
@@ -27,6 +29,8 @@ router.get("/api", (req:Request, res:Response) => {
 // images
 router.post('/api/upload-images/',upload.array('images'),UploadImages);
 router.delete('/api/delete-images/',deleteImageAndThumbnail);
+router.delete('/api/destroy-images-folder/',deleteImagesContainer);
+router.delete('/api/destroy-User-folder/',deleteUsersFiles);
 
 
   export default  router
