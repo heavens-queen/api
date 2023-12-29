@@ -4,6 +4,7 @@ import { UploadImages } from "../IMAGES/Uploads/index.js";
 import { deleteImageAndThumbnail } from "../IMAGES/Delete/deletSpecificImages.js";
 import { deleteImagesContainer } from "../IMAGES/Delete/destroyImageContainer.js";
 import { deleteUsersFiles } from "../helper/deleteUsersFiles/index.js";
+import { UploadVedio } from "../videos/Uploads/index.js";
 // import { registerUser } from "../Controllers/auth/Signup.js";
 // import { loginUser } from "../Controllers/auth/login.js";
 // import { getAllUsers } from "../Controllers/users/getAllUsers.js";
@@ -31,6 +32,9 @@ router.put('/api/upload-images/',upload.array('images'),UploadImages);
 router.delete('/api/delete-images/',deleteImageAndThumbnail);
 router.delete('/api/destroy-images-folder/',deleteImagesContainer);
 router.delete('/api/destroy-User-folder/',deleteUsersFiles);
+
+///upload video
+router.put('/api/upload-video/',UploadVedio);
 
 
   export default  router

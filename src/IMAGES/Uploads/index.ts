@@ -116,35 +116,34 @@ export const UploadImages = async (
           Body: thumbnailBuffer,
           ContentType: file.mimetype,
           Metadata: {
-            "Content-Disposition": "inline", // Set inline header
+            "Content-Disposition": "inline", // Seting  inline header
           },
         };
 
         await s3.send(new PutObjectCommand(thumbnailParams));
-
+        
         const metadata = await sharpInstance.metadata();
-
         // Access metadata properties
         const mimeType = metadata.format; // MIME type
-        const W = metadata.width; // Image width
-        const H = metadata.height; // Image height
+        const W = metadata.width;
+        const H = metadata.height;
         const OriginalFileSize = file.buffer.length / (1024 * 1024); // Convert bytes to megabytes
-        const finalFileSize = processedImageBuffer.length / (1024 * 1024); // Convert bytes to megabytes
+        const finalFileSize = processedImageBuffer.length / (1024 * 1024);
         const compressionApplied = (
           (1 - finalFileSize / OriginalFileSize) *
           100
-        ).toFixed(2); // Calculate compression as a percentage
+        ).toFixed(2); // Calculating compression as a %
 
         return {
           key: fileName,
           mimeType,
           width: W,
           height: H,
-          OriginalFileSize: `${OriginalFileSize.toFixed(2)} MB`, // Display two decimal places
-          finalFileSize: `${finalFileSize.toFixed(2)} MB`, // Display two decimal places
+          OriginalFileSize: `${OriginalFileSize.toFixed(2)} MB`, // Display 2 Dp
+          finalFileSize: `${finalFileSize.toFixed(2)} MB`,
           compressionApplied: `${compressionApplied}%`,
-          imageUrl: `http://${process.env.BUCKET_NAME}.s3.amazonaws.com/${userId}/images/${fileName}`,
-          thumbnailUrl: `http://${process.env.BUCKET_NAME}.s3.amazonaws.com/${userId}/images/${thumbnailFileName}`,
+          imageUrl: `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${userId}/images/${fileName}`,
+          thumbnailUrl: `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${userId}/images/${thumbnailFileName}`,
         };
       })
     );
