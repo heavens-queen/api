@@ -27,7 +27,7 @@ router.get("/api", (req:Request, res:Response) => {
 
 
 // images
-router.post('/api/upload-images/',upload.array('images'),UploadImages);
+router.put('/api/upload-images/',upload.array('images'),UploadImages);
 router.delete('/api/delete-images/',deleteImageAndThumbnail);
 router.delete('/api/destroy-images-folder/',deleteImagesContainer);
 router.delete('/api/destroy-User-folder/',deleteUsersFiles);

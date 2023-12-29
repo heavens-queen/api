@@ -26,7 +26,7 @@ export async function deleteImageAndThumbnail(
     // Validate key or keys
     if (!key && (!keys || !Array.isArray(keys))) {
       return res.status(400).json({
-        error: "Missing Image ID or invalid keys",
+        error: "Missing key or invalid keys",
       });
     }
   
