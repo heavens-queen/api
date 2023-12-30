@@ -17,6 +17,8 @@
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.481.0",
+    "@aws-sdk/lib-storage": "^3.484.0",
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "aws-sdk": "^2.1525.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -29,6 +31,8 @@
     "nodemon": "^3.0.2",
     "save": "^2.9.0",
     "sharp": "^0.33.1",
+    "stream-buffers": "^3.0.2",
+    "streamifier": "^0.1.1",
     "typescript": "^5.3.3",
     "uninstall": "^0.0.0",
     "uuid": "^9.0.1"
@@ -41,6 +45,8 @@
     "@types/morgan": "^1.9.9",
     "@types/multer": "^1.4.11",
     "@types/sharp": "^0.32.0",
+    "@types/stream-buffers": "^3.0.7",
+    "@types/streamifier": "^0.1.2",
     "@types/uuid": "^9.0.7",
     "ts-node": "^10.9.2"
   }
