@@ -6,6 +6,8 @@ import { deleteImagesContainer } from "../IMAGES/Delete/destroyImageContainer.js
 import { deleteUsersFiles } from "../helper/deleteUsersFiles/index.js";
 import { uploadVideo } from "../videos/Uploads/index.js";
 import { testing } from "../testing.js";
+import os from 'os';
+import path from 'path';
 // import { registerUser } from "../Controllers/auth/Signup.js";
 // import { loginUser } from "../Controllers/auth/login.js";
 // import { getAllUsers } from "../Controllers/users/getAllUsers.js";
@@ -27,7 +29,7 @@ router.get("/api", (req:Request, res:Response) => {
 //   router.route('/api/users/:id').get(getSingleUser).patch(authenticateToken,UpdateUser).delete(authenticateToken,deleteUser)
 
 
-const storeTemp= multer({ dest: '//home/glen/Desktop/mediaGlens/temp'});
+const storeTemp = multer({ dest: path.join(os.tmpdir(), 'mediaglens') });
 // images
 router.put('/api/upload-images/',upload.array('images'),UploadImages);
 router.delete('/api/delete-images/',deleteImageAndThumbnail);
