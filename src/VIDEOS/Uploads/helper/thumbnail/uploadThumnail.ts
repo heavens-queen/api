@@ -1,18 +1,22 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { s3 } from "../../../../config/s3Config.js";
 import fs from 'fs';
+import { resizeThumbnailImage } from "./resizeThumnail.js";
 
 export const uploadThumbnailToAWS = async (bucket: string, key: string, thumbnailPath: string) => {
     try {
         const thumbnailBuffer = fs.readFileSync(thumbnailPath);
-
+        const thumbnailResizedBuffer =await resizeThumbnailImage(thumbnailBuffer,640,480) 
       const params = {
         Bucket: bucket,
         Key: key,
-        Body: thumbnailBuffer,
+        Body: thumbnailResizedBuffer,
         GrantRead: 'uri="http://acs.amazonaws.com/groups/global/AllUsers"', // Make the image accessible to everyone
         ContentType: 'image/jpeg',  // Specify the content type based on your thumbnail format
-        ContentDisposition: 'inline',  // or 'attachment' if you want to force download
+        Metadata: {
+          "Content-Disposition": "inline", // Set inline header
+        },  // or 'attachment' if you want to force download
+        
       };
   
       const result = await s3.send(new PutObjectCommand(params));

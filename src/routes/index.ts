@@ -4,7 +4,7 @@ import { UploadImages } from "../IMAGES/Uploads/index.js";
 import { deleteImageAndThumbnail } from "../IMAGES/Delete/deletSpecificImages.js";
 import { deleteImagesContainer } from "../IMAGES/Delete/destroyImageContainer.js";
 import { deleteUsersFiles } from "../helper/deleteUsersFiles/index.js";
-import { uploadVideo } from "../videos/Uploads/index.js";
+import { uploadVideo } from "../VIDEOS/Uploads/index.js";
 import { testing } from "../testing.js";
 import os from 'os';
 import path from 'path';

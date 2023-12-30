@@ -76,8 +76,11 @@ export const uploadVideoFileToAWS = async (
       MultipartUpload: {
         Parts: parts,
       },
-      ContentDisposition: "inline", // or 'attachment' if you want to force download
+    
       ContentType: 'video/mp4',
+      Metadata: {
+        "Content-Disposition": "inline", // Set inline header
+      },
     };
 
     // Send the CompleteMultipartUploadCommand with the parameters

@@ -22,9 +22,10 @@ export const uploadVideo = async (
     }
     const bucketName = process.env.BUCKET_NAME || "";
     const objectKey = `${userId}/videos/${uuidv4()}.mp4`;
+    const thumnailKey=`${userId}/videos/Thumnails/${uuidv4()}.jpg`
     
     const generateThumbnail=await generateVideoThumnail(tempFilePath);
-    const thumnailUrl = await uploadThumbnailToAWS(bucketName, objectKey, generateThumbnail as string)
+    const thumnailUrl = await uploadThumbnailToAWS(bucketName, thumnailKey, generateThumbnail as string)
     const compressedFilePath = await compressVideo(tempFilePath);
    
     const compressedFileSize = (
