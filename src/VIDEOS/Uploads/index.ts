@@ -21,8 +21,9 @@ export const uploadVideo = async (
       throw new Error("No file uploaded");
     }
     const bucketName = process.env.BUCKET_NAME || "";
-    const objectKey = `${userId}/videos/${uuidv4()}.mp4`;
-    const thumnailKey=`${userId}/videos/Thumnails/${uuidv4()}.jpg`
+    const fileName= uuidv4();
+    const objectKey = `${userId}/videos/${fileName}.mp4`;
+    const thumnailKey=`${userId}/videos/Thumnails/${fileName}.jpg`
     
     const generateThumbnail=await generateVideoThumnail(tempFilePath);
     const thumnailUrl = await uploadThumbnailToAWS(bucketName, thumnailKey, generateThumbnail as string)
@@ -52,9 +53,10 @@ export const uploadVideo = async (
       fs.unlinkSync(req.file.path);
       console.log("Temporary file deleted successfully.");
     }
+    const key=``
 
     res.status(200).json({
-      key: objectKey,
+      key: fileName,
       thumnailUrl,
       videoUrl: url,
       message: "video uploaded successfully",

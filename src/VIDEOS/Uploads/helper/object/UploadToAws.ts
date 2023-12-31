@@ -50,6 +50,10 @@ export const uploadVideoFileToAWS = async (
       const uploadPartParams = {
         Bucket: bucket,
         Key: key,
+        ContentType: 'video/mp4',
+      Metadata: {
+        "Content-Disposition": "inline", // Set inline header
+      },
         UploadId: UploadId,
         PartNumber: partNumber,
         Body: chunk,

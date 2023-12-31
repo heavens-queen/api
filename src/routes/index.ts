@@ -8,6 +8,7 @@ import { uploadVideo } from "../VIDEOS/Uploads/index.js";
 import { testing } from "../testing.js";
 import os from 'os';
 import path from 'path';
+import { deleteVideoAndThumbnail } from "../VIDEOS/deleteVideo/deleteVideo.js";
 // import { registerUser } from "../Controllers/auth/Signup.js";
 // import { loginUser } from "../Controllers/auth/login.js";
 // import { getAllUsers } from "../Controllers/users/getAllUsers.js";
@@ -38,7 +39,7 @@ router.delete('/api/destroy-User-folder/',deleteUsersFiles);
 
 ///upload video
 router.put('/api/upload-video/',storeTemp.single('video'),uploadVideo);
-router.put('/api/upload/',testing);
+router.delete('/api/delete-video/',deleteVideoAndThumbnail);
 
 
   export default  router

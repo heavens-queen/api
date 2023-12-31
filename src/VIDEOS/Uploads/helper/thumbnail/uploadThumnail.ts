@@ -15,7 +15,7 @@ export const uploadThumbnailToAWS = async (bucket: string, key: string, thumbnai
         ContentType: 'image/jpeg',  // Specify the content type based on your thumbnail format
         Metadata: {
           "Content-Disposition": "inline", // Set inline header
-        },  // or 'attachment' if you want to force download
+        },
         
       };
   

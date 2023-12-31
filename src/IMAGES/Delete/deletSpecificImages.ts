@@ -51,7 +51,7 @@ export async function deleteImageAndThumbnail(
         // Check if there are any files to delete
         if (keysToDelete.length === 0) {
           return res.status(400).json({
-            error: `No files found with the specified ${key}`
+            error: `No files found with the specified  key ${key}`
           });
         }else{
 
