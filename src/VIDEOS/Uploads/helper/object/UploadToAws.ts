@@ -18,6 +18,11 @@ export const uploadVideoFileToAWS = async (
     const createMultipartUploadParams = {
       Bucket: bucket,
       Key: key,
+      ContentType: 'video/mp4',
+      Metadata: {
+        "Content-Disposition": "inline", // Set inline header
+      },
+      
     };
 
     // Send the CreateMultipartUploadCommand with the parameters

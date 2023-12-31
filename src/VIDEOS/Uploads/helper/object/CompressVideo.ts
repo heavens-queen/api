@@ -21,7 +21,7 @@ export  const compressVideo = (inputFilePath: string) => {
       .videoCodec("libx264")
       .audioCodec("aac")
       .outputOptions([
-        "-preset veryfast",
+        '-preset veryfast',
         "-crf 23",
         "-vf",
         `scale=${targetResolution}`,
