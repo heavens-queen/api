@@ -9,6 +9,7 @@ import { testing } from "../testing.js";
 import os from 'os';
 import path from 'path';
 import { deleteVideoAndThumbnail } from "../VIDEOS/deleteVideo/deleteVideo.js";
+import { deletevideosContainer } from "../VIDEOS/deleteVideo/DestroVideoContainer.js";
 // import { registerUser } from "../Controllers/auth/Signup.js";
 // import { loginUser } from "../Controllers/auth/login.js";
 // import { getAllUsers } from "../Controllers/users/getAllUsers.js";
@@ -35,11 +36,16 @@ const storeTemp = multer({ dest: path.join(os.tmpdir(), 'mediaglens') });
 router.put('/api/upload-images/',upload.array('images'),UploadImages);
 router.delete('/api/delete-images/',deleteImageAndThumbnail);
 router.delete('/api/destroy-images-folder/',deleteImagesContainer);
-router.delete('/api/destroy-User-folder/',deleteUsersFiles);
 
 ///upload video
 router.put('/api/upload-video/',storeTemp.single('video'),uploadVideo);
 router.delete('/api/delete-video/',deleteVideoAndThumbnail);
+router.delete('/api/destroy-videos-folder/',deletevideosContainer);
+
+
+//danger zone " user file"
+router.delete('/api/destroy-User-folder/',deleteUsersFiles);
+
 
 
   export default  router
