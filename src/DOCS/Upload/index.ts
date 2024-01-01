@@ -136,6 +136,3 @@ async function generateThumbnailFromXlsx(file: Express.Multer.File, workbookFunc
 // ...
 
 // Example usage:
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
-});
