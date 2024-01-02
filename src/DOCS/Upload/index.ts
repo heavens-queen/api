@@ -1,138 +1,140 @@
-import express from 'express';
-import * as multer from 'multer';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as pdfThumbnail from 'pdf-thumbnail';
-import * as mammoth from 'mammoth';
-import * as pptxgen from 'pptxgenjs';
-import * as ExcelJS from 'exceljs';
-import * as AWS from 'aws-sdk';
-import * as archiver from 'archiver';
+import express, { NextFunction } from "express";
+import multer from "multer";
+import {
+  PutObjectCommand,
+  PutObjectCommandInput,
+  S3,
+} from "@aws-sdk/client-s3";
+import archiver from "archiver";
+import fs from "fs";
+import path from "path";
+import os from "os";
+import { s3 } from "../../config/s3Config.js";
+import { v4 as uuid } from "uuid";
 
-const app = express();
-const port = 3000;
-
-const upload = multer({ dest: 'uploads/' });
-
-// AWS S3 Configuration
-const s3 = new AWS.S3({
-  accessKeyId: 'your-access-key-id',
-  secretAccessKey: 'your-secret-access-key',
-});
-
-app.post('/upload', upload.array('files'), async (req, res) => {
+export const uploadFiles = async (
+  req: express.Request,
+  res: express.Response,
+  next:NextFunction
+) => {
+  const userId = req.query.userId;
+  const key = `${userId}/files`;
+  const files = req.files as Express.Multer.File[];
   try {
-    const uploadedFiles = req.files as Express.Multer.File[];
+   
+console.log('files',files)
+    if (files.length === 1) {
+      // Upload single file directly to S3
 
-    // Ensure at least one file is uploaded
-    if (uploadedFiles.length === 0) {
-      return res.status(400).json({ error: 'No files uploaded.' });
-    }
-
-    let thumbnailPath: string | undefined;
-
-    // Generate thumbnails in the specified order of priority
-    for (const file of uploadedFiles) {
-      const ext = path.extname(file.originalname).toLowerCase();
-
-      if (ext === '.pdf') {
-        thumbnailPath = await generateThumbnail(file, pdfThumbnail.generate);
-        break;
-      } else if (ext === '.docx') {
-        thumbnailPath = await generateThumbnailFromDocx(file, mammoth.extractRawText);
-        break;
-      } else if (ext === '.pptx') {
-        thumbnailPath = await generateThumbnailFromPptx(file, pptxgen);
-        break;
-      } else if (ext === '.xlsx') {
-        thumbnailPath = await generateThumbnailFromXlsx(file, ExcelJS.Workbook);
-        break;
-      }
-    }
-
-    // Upload the selected thumbnail to AWS S3
-    if (thumbnailPath) {
-      const thumbnailUploadParams = {
-        Bucket: 'your-s3-bucket',
-        Key: thumbnailPath,
-        Body: fs.createReadStream(thumbnailPath),
+      const file = files[0];
+      const objectKey = `${uuid()}-${file.originalname}`;
+      const uploadParams: PutObjectCommandInput = {
+        Bucket: process.env.BUCKET_NAME || "",
+        Key: `${key}/${objectKey}`,
+        Body: fs.createReadStream(file.path),
+        ContentType: file.mimetype,
+        Metadata: {
+          "Content-Disposition": "inline",
+        },
       };
-      await s3.upload(thumbnailUploadParams).promise();
 
-      // Remove the local thumbnail file after upload
-      fs.unlinkSync(thumbnailPath);
+      const result = await s3.send(new PutObjectCommand(uploadParams));
+    if(file.path){
+      fs.unlinkSync(file.path);
 
-      // Combine files into a ZIP archive
-      const zipPath = path.join('uploads', 'combined-files.zip');
-      const archive = archiver('zip', { zlib: { level: 9 } });
+    }
+      res.status(200).json({
+        message: "File uploaded successfully",
+        key: objectKey,
+        url:`https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${key}/${objectKey}`
+      });
+    } else {
+      // Zip multiple files and upload the zip file to S3
+      const zipFileName = `${uuid()}-files.zip`;
+      const zipPath = path.join(os.tmpdir(), zipFileName);
+
+      const archive = archiver("zip", {
+        zlib: { level: 9 }, // Compression level
+      });
+
       const zipStream = fs.createWriteStream(zipPath);
-
       archive.pipe(zipStream);
-      uploadedFiles.forEach((file) => {
-        archive.file(file.path, { name: file.originalname });
+
+      // Remove each temporary file after adding to the archive
+      files.forEach((file) => {
+        archive.append(fs.createReadStream(file.path), {
+          name: file.originalname,
+        });
+
       });
       archive.finalize();
 
-      // Upload the ZIP file to AWS S3
-      const zipUploadParams = {
-        Bucket: 'your-s3-bucket',
-        Key: 'combined-files.zip',
-        Body: fs.createReadStream(zipPath),
-      };
-      await s3.upload(zipUploadParams).promise();
+      zipStream.on("close", async () => {
+        try {
+          const uploadParams: PutObjectCommandInput = {
+            Bucket: process.env.BUCKET_NAME || "",
+            Key: `${key}/${zipFileName}`,
+            Body: fs.createReadStream(zipPath),
+            ContentType: "application/zip",
+            Metadata: {
+              "Content-Disposition": "inline",
+            },
+          };
 
-      // Remove the local ZIP file after upload
-      fs.unlinkSync(zipPath);
+          const result = await s3.send(new PutObjectCommand(uploadParams));
+          if (fs.existsSync(zipPath)) {
+            fs.unlinkSync(zipPath); //Delete temporary file
+            console.log(` Zip file deleted:${zipPath} `)
+          } else {
+            console.warn(`Zip File not found: ${zipPath}`);
+          }
 
-      res.json({ thumbnailUrl: `https://your-s3-bucket.s3.amazonaws.com/${path.basename(thumbnailPath)}`, zipUrl: `https://your-s3-bucket.s3.amazonaws.com/combined-files.zip` });
-    } else {
-      res.status(400).json({ error: 'No supported file types found.' });
+          if(files){
+            files.forEach((file) => {
+              // Check if the file exists before attempting to unlink it
+              if (fs.existsSync(file.path)) {
+                fs.unlinkSync(file.path);
+                console.log(`file deleted after zipping at :${file.path} `)
+              } else {
+                console.warn(`File not found on zipping : ${file.path}`);
+              }
+            });
+        
+          }
+        
+          res.status(200).json({
+            message: "Files zipped and uploaded successfully",
+            key: zipFileName,
+            url:`https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${key}/${zipFileName}`
+          });
+        } catch (err: any) {
+          if (fs.existsSync(zipPath)) {
+            fs.unlinkSync(zipPath); //Delete temporary file
+            console.log(` Zip file deleted:${zipPath} `)
+          } else {
+            console.warn(`Zip File not found: ${zipPath}`);
+          }
+          throw new Error(err);
+        }
+      });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error uploading files:", error);
+   
+    console.log("in the error",files);
+    // Handle error and remove temporary files
+    if(files){
+      files.forEach((file) => {
+        // Check if the file exists before attempting to unlink it
+        if (fs.existsSync(file.path)) {
+          fs.unlinkSync(file.path);
+          console.log(`file deleted on error at :${file.path} `)
+        } else {
+          console.warn(`File not found on error : ${file.path}`);
+        }
+      });
+    }
+
+    next(error)
   }
-});
-
-async function generateThumbnail(file: Express.Multer.File, generateFunction: Function): Promise<string> {
-  const thumbnailPath = path.join('thumbnails', `${file.filename}-thumbnail.jpg`);
-  await generateFunction(file.path, { size: 'small', output: thumbnailPath });
-  return thumbnailPath;
-}
-
-async function generateThumbnailFromDocx(file: Express.Multer.File, extractFunction: Function): Promise<string> {
-  const { value } = await extractFunction({ path: file.path });
-  const thumbnailPath = path.join('thumbnails', `${file.filename}-thumbnail.jpg`);
-  // Create a thumbnail from the extracted text (use your method for creating an image from text)
-  // Replace with your actual method
-  createImageFromText(value);
-  return thumbnailPath;
-}
-
-async function generateThumbnailFromPptx(file: Express.Multer.File, pptxgenFunction: Function): Promise<string> {
-  const pptx = pptxgenFunction();
-  // Add slides or content to the presentation
-  await pptx.render();
-  const thumbnailPath = path.join('thumbnails', `${file.filename}-thumbnail.jpg`);
-  // Create a thumbnail from the rendered presentation (use your method for creating an image from the presentation)
-  // Replace with your actual method
-  createImageFromPresentation(pptx);
-  return thumbnailPath;
-}
-
-async function generateThumbnailFromXlsx(file: Express.Multer.File, workbookFunction: Function): Promise<string> {
-  const workbook = new workbookFunction();
-  await workbook.xlsx.readFile(file.path);
-  // Add content to the workbook
-  await workbook.xlsx.writeBuffer();
-  const thumbnailPath = path.join('thumbnails', `${file.filename}-thumbnail.jpg`);
-  // Create a thumbnail from the workbook (use your method for creating an image from the workbook)
-  // Replace with your actual method
-  createImageFromWorkbook(workbook);
-  return thumbnailPath;
-}
-
-// Add your actual implementations for createImageFromText, createImageFromPresentation, createImageFromWorkbook
-// ...
-
-// Example usage:
+};

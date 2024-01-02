@@ -53,8 +53,7 @@ export const uploadVideo = async (
       fs.unlinkSync(req.file.path);
       console.log("Temporary file deleted successfully.");
     }
-    const key=``
-
+  
     res.status(200).json({
       key: fileName,
       thumnailUrl,

@@ -10,6 +10,7 @@ import os from 'os';
 import path from 'path';
 import { deleteVideoAndThumbnail } from "../VIDEOS/deleteVideo/deleteVideo.js";
 import { deletevideosContainer } from "../VIDEOS/deleteVideo/DestroVideoContainer.js";
+import { uploadFiles } from "../DOCS/Upload/index.js";
 // import { registerUser } from "../Controllers/auth/Signup.js";
 // import { loginUser } from "../Controllers/auth/login.js";
 // import { getAllUsers } from "../Controllers/users/getAllUsers.js";
@@ -40,11 +41,14 @@ router.delete('/api/destroy-images-folder/',deleteImagesContainer);
 ///upload video
 router.put('/api/upload-video/',storeTemp.single('video'),uploadVideo);
 router.delete('/api/delete-video/',deleteVideoAndThumbnail);
-router.delete('/api/destroy-videos-folder/',deletevideosContainer);
+router.delete('/api/destroy-videouploadFiless-folder/',deletevideosContainer);
 
 
 //danger zone " user file"
 router.delete('/api/destroy-User-folder/',deleteUsersFiles);
+///docs/pdfs/
+router.put('/api/upload-files/',storeTemp.array('files'),uploadFiles);
+
 
 
 
