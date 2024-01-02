@@ -21,9 +21,10 @@ export const UploadImages = async (
       grayscale,
       rotate,
       format = "original",
-    } = req.body;
+    } = req.query 
 
     const userId = req.query.userId;
+    console.log("format",format)
     if (!userId) {
       throw new Error("userId is required");
     }
@@ -41,15 +42,15 @@ export const UploadImages = async (
         // Resize if width and/or height are provided
         if (width || height) {
           sharpInstance = sharpInstance.resize(
-            parseInt(width),
-            parseInt(height),
+            parseInt(width as string),
+            parseInt(height as string ),
             { fit: sharp.fit.inside, withoutEnlargement: true }
           );
         }
 
         // Crop if crop parameter is provided
         if (crop) {
-          const [left, top, width, height] = crop
+          const [left, top, width, height] = (crop as string)
             .split(",")
             .map((val: string) => parseInt(val));
           sharpInstance = sharpInstance.extract({ left, top, width, height });
@@ -60,19 +61,19 @@ export const UploadImages = async (
         }
 
         if (rotate) {
-          sharpInstance = sharpInstance.rotate(parseInt(rotate));
+          sharpInstance = sharpInstance.rotate(parseInt(rotate as string));
         }
         // Apply compression settings
 
         // Apply compression settings
         if (progressive && format === "jpeg") {
-          sharpInstance.jpeg({ quality: parseInt(quality), progressive: true });
+          sharpInstance.jpeg({ quality: parseInt(quality as string), progressive: true });
         } else if (format === "webp") {
-          sharpInstance.webp({ quality: parseInt(quality) });
+          sharpInstance.webp({ quality: parseInt(quality as string) });
         } else {
           // Default compression for other formats (or if format is not specified)
           sharpInstance.toFormat(fileExtension as keyof sharp.FormatEnum, {
-            quality: parseInt(quality),
+            quality: parseInt(quality as string),
           });
         }
 
@@ -86,10 +87,9 @@ export const UploadImages = async (
           .slice(0, -1)
           .join(".");
 
-        const formatSuffix =
-          format !== "original" ? `.${format}` : `.${fileExtension}`; // Include format only if it's not 'original'
+        const formatSuffix =format !== "original" ? `${format}` : `${fileExtension}`; // Include format only if it's not 'original'
 
-        const fileName = `${uuidv4()}-${fileNameWithoutExtension}${formatSuffix}`;
+        const fileName = `${uuidv4()}-${fileNameWithoutExtension}.${formatSuffix}`;
         // Process the image and upload to S3
         const processedImageBuffer = await sharpInstance.toBuffer();
 
@@ -97,7 +97,7 @@ export const UploadImages = async (
           Bucket: process.env.BUCKET_NAME || "", // Use the user's ID as a subfolder
           Key: `${userId}/images/${fileName}`,
           Body: processedImageBuffer,
-          ContentType: file.mimetype,
+          ContentType: `image/${formatSuffix}`,
           Metadata: {
             "Content-Disposition": "inline", // Set inline header
           },
@@ -114,7 +114,7 @@ export const UploadImages = async (
           Bucket: process.env.BUCKET_NAME || "", // Use the user's ID as a subfolder
           Key: `${userId}/images/${thumbnailFileName}`, // Use the generated ID as the thumbnail filename
           Body: thumbnailBuffer,
-          ContentType: file.mimetype,
+          ContentType: `image/${formatSuffix}`,
           Metadata: {
             "Content-Disposition": "inline", // Seting  inline header
           },
@@ -122,11 +122,7 @@ export const UploadImages = async (
 
         await s3.send(new PutObjectCommand(thumbnailParams));
         
-        const metadata = await sharpInstance.metadata();
-        // Access metadata properties
-        const mimeType = metadata.format; // MIME type
-        const W = metadata.width;
-        const H = metadata.height;
+
         const OriginalFileSize = file.buffer.length / (1024 * 1024); // Convert bytes to megabytes
         const finalFileSize = processedImageBuffer.length / (1024 * 1024);
         const compressionApplied = (
@@ -136,9 +132,7 @@ export const UploadImages = async (
 
         return {
           key: fileName,
-          mimeType,
-          width: W,
-          height: H,
+          mimeType:`image/${formatSuffix}`,
           OriginalFileSize: `${OriginalFileSize.toFixed(2)} MB`, // Display 2 Dp
           finalFileSize: `${finalFileSize.toFixed(2)} MB`,
           compressionApplied: `${compressionApplied}%`,

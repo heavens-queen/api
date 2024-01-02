@@ -41,6 +41,7 @@ console.log('files',files)
       const result = await s3.send(new PutObjectCommand(uploadParams));
     if(file.path){
       fs.unlinkSync(file.path);
+      console.log(`file :${file.path} was deleted succefully`)
 
     }
       res.status(200).json({
