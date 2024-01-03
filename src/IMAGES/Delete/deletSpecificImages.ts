@@ -50,7 +50,7 @@ export async function deleteImageAndThumbnail(
   
         // Check if there are any files to delete
         if (keysToDelete.length === 0) {
-          return res.status(400).json({
+          return res.status(404).json({
             error: `No files found with the specified  key ${key}`
           });
         }else{
@@ -75,7 +75,7 @@ export async function deleteImageAndThumbnail(
           });
         }
   
-        res.json({ success: true, message: "Image and its thumbnail deleted successfully" });
+        res.status(200).json({ success: true, message: "Image and its thumbnail deleted successfully" });
     }
       } else if (keys) {
         const Objects: ObjectIdentifier[] = keys.flatMap((key: any) => {
@@ -94,9 +94,9 @@ export async function deleteImageAndThumbnail(
       
         // Check if there are any files to delete
         if (imageKeysToDelete.length === 0 && thumbnailKeysToDelete.length === 0) {
-          return res.status(400).json({
-            error: `No files found with the specified ${key}`,
-          });
+          return res.status(404).json({
+            error: `No files found with the specified key ${key}`
+        });
         }
       
         // Delete images

@@ -22,12 +22,12 @@ tags:
   - name: IMAGES UPLOAD
     description: Operations related to uploading images
 paths:
-  /api/upload-images:
-    put:
+  /api/delete-images/:
+    delete:
       tags:
-        - IMAGES UPLOAD
-      summary: Upload images
-      description: Upload images to the server. Supports multiple file uploads.
+        - IMAGES DELETE
+      summary: Delete images
+      description: Delete images from the server. Requires user authentication and images keys obtained during image uploads.
       security:
         - ApiKeyAuth: []
         - UserIdAuth: []
@@ -40,73 +40,26 @@ paths:
           name: x-user-id
           description: User ID
           required: true
-        - in: query
-          name: width
-          description: Width of the image.
-          required: false
-          schema:
-            type: integer
-        - in: query
-          name: height
-          description: Height of the image.
-          required: false
-          schema:
-            type: integer
-        - in: query
-          name: quality
-          description: Quality of the image (default is 80).
-          required: false
-          schema:
-            type: integer
-        - in: query
-          name: crop
-          description: Crop parameters in the order left, top, width, height.
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: progressive
-          description: Enable progressive rendering.
-          required: false
-          schema:
-            type: boolean
-        - in: query
-          name: grayscale
-          description: Convert the image to grayscale.
-          required: false
-          schema:
-            type: boolean
-        - in: query
-          name: rotate
-          description: Rotation angle of the image.
-          required: false
-          schema:
-            type: integer
-        - in: query
-          name: format
-          description: Output format of the image (default is "original").
-          required: false
-          schema:
-            type: string.
       requestBody:
         content:
-          multipart/form-data:
+          application/json:
             schema:
               type: object
               properties:
                 images:
                   type: array
                   items:
-                    type: file
+                    type: string
+                  description: Array of image keys obtained during image uploads.
       responses:
         "200":
-          description: Images uploaded successfully
+          description: Images deleted successfully
         "400":
           description: Bad Request. Indicates invalid parameters.
           content:
             application/json:
               example:
-                message: "Invalid parameters. Provide valid values for width, height, quality, crop, progressive, grayscale, rotate, and format."
+                message: "Invalid parameters. Provide valid values for images."
         "401":
           description: Unauthorized. Indicates missing or invalid API key or user ID.
           content:
@@ -125,33 +78,6 @@ paths:
             application/json:
               example:
                 message: "Internal Server Error. Please try again later."
-      x-code-x-code-samples:
-        samples:
-          - lang: javascript
-            source: |
-              // JavaScript code sample to handle the response
-              const formData = new FormData();
-              formData.append('images', yourFile); // Add your file here
+# delte
+# Path: src/routes/swagger.yaml
 
-              fetch('http://localhost:8080/api/upload-images?x-api-key=your-api-key&x-user-id=your-user-id', {
-                method: 'PUT',
-                body: formData,
-              })
-              .then(response => response.json())
-              .then(data => console.log(data))
-              .catch(error => console.error(error));
-          - lang: python
-            source: |
-              # Python code sample to handle the response
-              import requests
-
-              url = "http://localhost:8080/api/upload-images"
-              headers = {
-                  'x-api-key': 'your-api-key',
-                  'x-user-id': 'your-user-id',
-              }
-
-              files = {'images': ('your_file.jpg', open('your_file.jpg', 'rb'))}
-
-              response = requests.put(url, headers=headers, files=files)
-              print(response.json())

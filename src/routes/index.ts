@@ -35,14 +35,11 @@ const storeTemp = multer({ dest: path.join(os.tmpdir(), "mediaglens") });
 // images
 /**
  *   @openapi
- * tags:
- *   - name: IMAGES UPLOAD
- *     description: Operations related to uploading images
  * paths:
  *   /api/upload-images:
  *     put:
  *       tags:
- *         - IMAGES UPLOAD
+ *         - IMAGES 
  *       summary: Upload images
  *       description: Upload images to the server. Supports multiple file uploads.
  *       security:
@@ -123,31 +120,133 @@ const storeTemp = multer({ dest: path.join(os.tmpdir(), "mediaglens") });
  *           content:
  *             application/json:
  *               example:
- *                 message: "Invalid parameters. Provide valid values for width, height, quality, crop, progressive, grayscale, rotate, and format."
+ *                 error: "Invalid parameters. Provide valid values for width, height, quality, crop, progressive, grayscale, rotate, and format."
  *         "401":
  *           description: Unauthorized. Indicates missing or invalid API key or user ID.
  *           content:
  *             application/json:
  *               example:
- *                 message: "Invalid API key or user ID. Please provide valid credentials."
+ *                 error: "Invalid API key or user ID. Please provide valid credentials."
  *         "404":
  *           description: Not Found. Indicates the endpoint is not found.
  *           content:
  *             application/json:
  *               example:
- *                 message: "Endpoint not found."
+ *                 error: "Endpoint not found."
  *         "500":
  *           description: Internal Server Error. Indicates a server error.
  *           content:
  *             application/json:
  *               example:
- *                 message: "Internal Server Error. Please try again later."
+ *                 error: "Internal Server Error. Please try again later."
  */
 router.put("/api/upload-images/", upload.array("images"), UploadImages);
-
+/**
+ *     @openapi
+ * paths:
+ *   /api/delete-images/:
+ *     delete:
+ *       tags:
+ *         - IMAGES
+ *       summary: Delete images
+ *       description: Delete images from the server. Requires user authentication and images keys obtained during image uploads.
+ *       security:
+ *         - ApiKeyAuth: []
+ *         - UserIdAuth: []
+ *       parameters:
+ *         - in: header
+ *           name: x-api-key
+ *           description: API key
+ *           required: true
+ *         - in: header
+ *           name: x-user-id
+ *           description: User ID
+ *           required: true
+ *       requestBody:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 keys:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   description: Array of image keys obtained during image uploads.
+ *       responses:
+ *         "200":
+ *           description: Images deleted successfully
+ *         "400":
+ *           description: Bad Request. Indicates invalid parameters.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 error: "Invalid parameters. Provide valid values for images."
+ *         "401":
+ *           description: Unauthorized. Indicates missing or invalid API key or user ID.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 error: "Invalid API key or user ID. Please provide valid credentials."
+ *         "404":
+ *           description: Not Found. Indicates no files found with the specified key.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 error: 'No files found with the specified key.'
+ *         "500":
+ *           description: Internal Server Error. Indicates a server error.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 error: "Internal Server Error. Please try again later."
+ */
 router.delete("/api/delete-images/", deleteImageAndThumbnail);
-router.delete("/api/destroy-images-folder/", deleteImagesContainer);
 
+/**
+ * @swagger
+ * paths:
+ *   /api/destroy-images-folder/:
+ *     delete:
+ *       tags:
+ *         - IMAGES
+ *       summary: DANGER ZONE **Destroy images folder**
+ *       description: WARNING! Irreversibly deletes all images associated with the user ID. This operation cannot be undone.
+ *       security:
+ *         - ApiKeyAuth: []
+ *         - UserIdAuth: []
+ *       parameters:
+ *         - in: header
+ *           name: x-api-key
+ *           description: API key
+ *           required: true
+ *         - in: header
+ *           name: x-user-id
+ *           description: User ID
+ *           required: true
+ *       responses:
+ *         "200":
+ *           description: Images folder destroyed successfully
+ *         "401":
+ *           description: Unauthorized. Indicates missing or invalid API key or user ID.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 error: 'Invalid API key or user ID. Please provide valid credentials.'
+ *         "404":
+ *           description: Not Found. Indicates no images found for the provided user ID.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 error: 'No images found for the provided user ID.'
+ *         "500":
+ *           description: Internal Server Error. Indicates a server error.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 error: 'Internal Server Error. Please try again later.'
+ */
+router.delete("/api/destroy-images-folder/", deleteImagesContainer);
 ///upload video
 router.put("/api/upload-video/", storeTemp.single("video"), uploadVideo);
 router.delete("/api/delete-video/", deleteVideoAndThumbnail);

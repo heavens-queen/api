@@ -24,7 +24,7 @@ Empower your applications with MediaGlens API to enhance and optimize your media
 Whether you're working with images, documents, or other digital media, MediaGlens API empowers you to optimize, compress, and manage your content efficiently. Unlock the full potential of your media assets and create engaging experiences with ease.
 `,
 contact:{
-  name:"MediaGlens",
+  name:"Contact the developer ",
   url:"https://mediaglens.com",
   email:"ayiendaglen@gmail.com"
 },
@@ -42,6 +42,32 @@ contact:{
       {
         url: "http://localhost:8080",
       },
+    ],
+    tags:[
+      {
+        name:"IMAGES",
+        description:"Operations related to images",
+        externalDocs:{
+          description:"**View code implimentation examples**",
+          url:"https://path-to-your-documentation/code-examples"
+        }
+      },
+      {
+        name:"VIDEOS",
+        description:"Operations related to videos",
+        externalDocs:{
+          description:"**View code implimentation examples**",
+          url:"https://path-to-your-documentation/code-examples"
+        }
+      },
+      {
+        name:"FILES",
+        description:"Operations related to files i.e PDFS,DOCX,PPTS,XLSX",
+        externalDocs:{
+          description:"**View code implimentation examples**",
+          url:"https://path-to-your-documentation/code-examples"
+        }
+      }
     ],
     components: {
       securitySchemes: {
