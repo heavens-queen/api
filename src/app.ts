@@ -8,9 +8,12 @@ import express, {
   import { config } from "dotenv";
   import createHttpError from "http-errors";
   import connectToDatabase from "./db/index.js";
+  import swaggerUi from 'swagger-ui-express';
+ 
 
   import logger from 'morgan';
 import router from "./routes/index.js";
+import { specs } from "./Documentation/swagger.js";
 
   config();
   
@@ -21,11 +24,14 @@ import router from "./routes/index.js";
   // app.use(logger(':method :url :status :res[content-length] - :response-time ms :user-agent'));
   //middlewares
   app.use(express.json());
-  
+  app.disable('x-powered-by');
   app.get("/", (req: Request, res: Response, next: NextFunction) => {
     res.send("car hub api");
   });
   app.use(router);
+   //swagger
+   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+  
   app.use("*", (req: Request, res: Response, next: NextFunction) => {
     // Simulate a 404 error
     next(
@@ -48,7 +54,7 @@ import router from "./routes/index.js";
       .json({ error: err.message || "something went wrong" });
   };
   app.use(handleErrors);
-  
+ 
   const start = async (url: string, port: number) => {
     try {
       // await connectToDatabase(url);

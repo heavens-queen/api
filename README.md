@@ -1,4 +1,8 @@
 # mediaGlens
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 # MediaLens API
 MediaLens is a developer-friendly API designed for efficient storage optimization, file processing, and compression of various file types, including images, videos, PDFs, and documents. The API offers fast and cost-effective solutions for developers looking to enhance their file handling workflows.
 

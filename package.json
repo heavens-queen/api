@@ -19,7 +19,6 @@
     "@aws-sdk/client-s3": "^3.481.0",
     "@aws-sdk/lib-storage": "^3.484.0",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
-    "@pdftron/pdfnet-node": "^10.6.0-4",
     "@types/archiver": "^6.0.2",
     "archiver": "^6.0.1",
     "aws-sdk": "^2.1525.0",
@@ -36,6 +35,8 @@
     "sharp": "^0.33.1",
     "stream-buffers": "^3.0.2",
     "streamifier": "^0.1.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0",
     "typescript": "^5.3.3",
     "uninstall": "^0.0.0",
     "uuid": "^9.0.1"
@@ -50,6 +51,8 @@
     "@types/sharp": "^0.32.0",
     "@types/stream-buffers": "^3.0.7",
     "@types/streamifier": "^0.1.2",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.6",
     "@types/uuid": "^9.0.7",
     "ts-node": "^10.9.2"
   }

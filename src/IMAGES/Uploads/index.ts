@@ -21,10 +21,10 @@ export const UploadImages = async (
       grayscale,
       rotate,
       format = "original",
-    } = req.query 
+    } = req.query;
 
     const userId = req.query.userId;
-    console.log("format",format)
+    console.log("format", format);
     if (!userId) {
       throw new Error("userId is required");
     }
@@ -43,17 +43,24 @@ export const UploadImages = async (
         if (width || height) {
           sharpInstance = sharpInstance.resize(
             parseInt(width as string),
-            parseInt(height as string ),
+            parseInt(height as string),
             { fit: sharp.fit.inside, withoutEnlargement: true }
           );
         }
 
-        // Crop if crop parameter is provided
         if (crop) {
           const [left, top, width, height] = (crop as string)
             .split(",")
-            .map((val: string) => parseInt(val));
-          sharpInstance = sharpInstance.extract({ left, top, width, height });
+            .map((val: string) => parseInt(val, 10));
+
+          // Check if all values are valid integers
+          if (!isNaN(left) && !isNaN(top) && !isNaN(width) && !isNaN(height)) {
+            sharpInstance = sharpInstance.extract({ left, top, width, height });
+          } else {
+            return res
+              .status(400)
+              .json({ error: "Invalid crop values provided" });
+          }
         }
 
         if (grayscale) {
@@ -61,13 +68,24 @@ export const UploadImages = async (
         }
 
         if (rotate) {
-          sharpInstance = sharpInstance.rotate(parseInt(rotate as string));
+          const rotationAngle = parseInt(rotate as string, 10);
+
+          // Check if the parsed value is a valid integer
+          if (!isNaN(rotationAngle)) {
+            sharpInstance = sharpInstance.rotate(rotationAngle);
+          } else {
+            return res
+              .status(400)
+              .json({ error: "Invalid rotation angle provided" });
+          }
         }
-        // Apply compression settings
 
         // Apply compression settings
         if (progressive && format === "jpeg") {
-          sharpInstance.jpeg({ quality: parseInt(quality as string), progressive: true });
+          sharpInstance.jpeg({
+            quality: parseInt(quality as string),
+            progressive: true,
+          });
         } else if (format === "webp") {
           sharpInstance.webp({ quality: parseInt(quality as string) });
         } else {
@@ -87,7 +105,8 @@ export const UploadImages = async (
           .slice(0, -1)
           .join(".");
 
-        const formatSuffix =format !== "original" ? `${format}` : `${fileExtension}`; // Include format only if it's not 'original'
+        const formatSuffix =
+          format !== "original" ? `${format}` : `${fileExtension}`; // Include format only if it's not 'original'
 
         const fileName = `${uuidv4()}-${fileNameWithoutExtension}.${formatSuffix}`;
         // Process the image and upload to S3
@@ -121,7 +140,6 @@ export const UploadImages = async (
         };
 
         await s3.send(new PutObjectCommand(thumbnailParams));
-        
 
         const OriginalFileSize = file.buffer.length / (1024 * 1024); // Convert bytes to megabytes
         const finalFileSize = processedImageBuffer.length / (1024 * 1024);
@@ -132,7 +150,7 @@ export const UploadImages = async (
 
         return {
           key: fileName,
-          mimeType:`image/${formatSuffix}`,
+          mimeType: `image/${formatSuffix}`,
           OriginalFileSize: `${OriginalFileSize.toFixed(2)} MB`, // Display 2 Dp
           finalFileSize: `${finalFileSize.toFixed(2)} MB`,
           compressionApplied: `${compressionApplied}%`,

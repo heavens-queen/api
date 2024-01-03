@@ -1,0 +1,157 @@
+openapi: 3.0.0
+info:
+  title: MediaGlens
+  version: 1.0.0
+  description: |
+    MediaGlens API offers a powerful suite of features to enhance and optimize your media assets. Developers can take advantage of the following functionalities:
+
+    - **Image Optimization and Customization:** Seamlessly optimize and customize images to meet specific requirements. Adjust dimensions, quality, and format effortlessly.
+
+    - **File Compression and Storage:** Compress and store various file types, including images, documents (docx, pdfs, ppts, xls), and more. Save storage space while maintaining content integrity.
+
+    - **Efficient Image Processing:** Perform complex image processing tasks, including cropping, rotating, and converting to grayscale. Achieve the desired visual output with ease.
+
+    - **Secure Storage:** Utilize secure storage options, with support for images and files. Store, retrieve, and manage media assets securely.
+
+    - **Streamlined Integration:** Integrate seamlessly with your applications and services. Our API is designed for easy integration, providing a smooth experience for developers.
+
+    Whether you are working with images or various file formats, MediaGlens empowers developers to optimize, compress, and manage media content efficiently. Explore the comprehensive set of features for a seamless media processing experience.
+servers:
+  - url: "http://localhost:8080"
+tags:
+  - name: IMAGES UPLOAD
+    description: Operations related to uploading images
+paths:
+  /api/upload-images:
+    put:
+      tags:
+        - IMAGES UPLOAD
+      summary: Upload images
+      description: Upload images to the server. Supports multiple file uploads.
+      security:
+        - ApiKeyAuth: []
+        - UserIdAuth: []
+      parameters:
+        - in: header
+          name: x-api-key
+          description: API key
+          required: true
+        - in: header
+          name: x-user-id
+          description: User ID
+          required: true
+        - in: query
+          name: width
+          description: Width of the image.
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: height
+          description: Height of the image.
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: quality
+          description: Quality of the image (default is 80).
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: crop
+          description: Crop parameters in the order left, top, width, height.
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: progressive
+          description: Enable progressive rendering.
+          required: false
+          schema:
+            type: boolean
+        - in: query
+          name: grayscale
+          description: Convert the image to grayscale.
+          required: false
+          schema:
+            type: boolean
+        - in: query
+          name: rotate
+          description: Rotation angle of the image.
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: format
+          description: Output format of the image (default is "original").
+          required: false
+          schema:
+            type: string.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                images:
+                  type: array
+                  items:
+                    type: file
+      responses:
+        "200":
+          description: Images uploaded successfully
+        "400":
+          description: Bad Request. Indicates invalid parameters.
+          content:
+            application/json:
+              example:
+                message: "Invalid parameters. Provide valid values for width, height, quality, crop, progressive, grayscale, rotate, and format."
+        "401":
+          description: Unauthorized. Indicates missing or invalid API key or user ID.
+          content:
+            application/json:
+              example:
+                message: "Invalid API key or user ID. Please provide valid credentials."
+        "404":
+          description: Not Found. Indicates the endpoint is not found.
+          content:
+            application/json:
+              example:
+                message: "Endpoint not found."
+        "500":
+          description: Internal Server Error. Indicates a server error.
+          content:
+            application/json:
+              example:
+                message: "Internal Server Error. Please try again later."
+      x-code-x-code-samples:
+        samples:
+          - lang: javascript
+            source: |
+              // JavaScript code sample to handle the response
+              const formData = new FormData();
+              formData.append('images', yourFile); // Add your file here
+
+              fetch('http://localhost:8080/api/upload-images?x-api-key=your-api-key&x-user-id=your-user-id', {
+                method: 'PUT',
+                body: formData,
+              })
+              .then(response => response.json())
+              .then(data => console.log(data))
+              .catch(error => console.error(error));
+          - lang: python
+            source: |
+              # Python code sample to handle the response
+              import requests
+
+              url = "http://localhost:8080/api/upload-images"
+              headers = {
+                  'x-api-key': 'your-api-key',
+                  'x-user-id': 'your-user-id',
+              }
+
+              files = {'images': ('your_file.jpg', open('your_file.jpg', 'rb'))}
+
+              response = requests.put(url, headers=headers, files=files)
+              print(response.json())
