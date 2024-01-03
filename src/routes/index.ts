@@ -11,6 +11,7 @@ import path from "path";
 import { deleteVideoAndThumbnail } from "../VIDEOS/deleteVideo/deleteVideo.js";
 import { deletevideosContainer } from "../VIDEOS/deleteVideo/DestroVideoContainer.js";
 import { uploadFiles } from "../DOCS/Upload/index.js";
+import { deleteFilesDocs } from "../DOCS/DeleteFilesDocs/index.js";
 // import { registerUser } from "../Controllers/auth/Signup.js";
 // import { loginUser } from "../Controllers/auth/login.js";
 // import { getAllUsers } from "../Controllers/users/getAllUsers.js";
@@ -435,5 +436,6 @@ router.delete("/api/destroy-User-folder/", deleteUsersFiles);
 
 ///docs/pdfs/ppts upload
 router.put("/api/upload-files/", storeTemp.array("files"), uploadFiles);
+router.delete("/api/delete-file-docs/",  deleteFilesDocs);
 
 export default router;

@@ -8,7 +8,7 @@ import {
 import { listObjectsWithPrefix } from "../../IMAGES/Delete/helper/SinglePrefixObjects.js";
  
   
-  export const  deletefileAndThumbnail = async (
+  export const  deleteFilesDocs  = async  (
       req: Request,
       res: Response,
       next: NextFunction
