@@ -247,9 +247,187 @@ router.delete("/api/delete-images/", deleteImageAndThumbnail);
  *                 error: 'Internal Server Error. Please try again later.'
  */
 router.delete("/api/destroy-images-folder/", deleteImagesContainer);
-///upload video
+
+//video
+
+/**
+ * @swagger
+ * paths:
+ *   /api/upload-video/:
+ *     put:
+ *       tags:
+ *         - VIDEOS
+ *       summary: Upload video
+ *       description: Upload a video to the server. Supports a single video upload with a maximum file size of 100 MB.
+ *       security:
+ *         - ApiKeyAuth: []
+ *         - UserIdAuth: []
+ *       parameters:
+ *         - in: header
+ *           name: x-api-key
+ *           description: API key
+ *           required: true
+ *         - in: header
+ *           name: x-user-id
+ *           description: User ID
+ *           required: true
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           multipart/form-data:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 video:
+ *                   type: string
+ *                   format: binary
+ *       responses:
+ *         "200":
+ *           description: Video uploaded successfully
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Video uploaded successfully'
+ *         "400":
+ *           description: Bad Request. Indicates the video file exceeds 100 MB.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Video file exceeds the maximum allowed size of 100 MB.'
+ *         "401":
+ *           description: Unauthorized. Indicates missing or invalid API key or user ID.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Invalid API key or user ID. Please provide valid credentials.'
+ *         "404":
+ *           description: Not Found. Indicates the endpoint is not found.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Endpoint not found.'
+ *         "500":
+ *           description: Internal Server Error. Indicates a server error.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Internal Server Error. Please try again later.'
+ */
 router.put("/api/upload-video/", storeTemp.single("video"), uploadVideo);
+
+/**
+ * @swagger
+
+ * paths:
+ *   /api/delete-video/:
+ *     delete:
+ *       tags:
+ *         - VIDEOS
+ *       summary: Delete video
+ *       description: Delete a video using its key. The key should be provided in the request body.
+ *       security:
+ *         - ApiKeyAuth: []
+ *         - UserIdAuth: []
+ *       parameters:
+ *         - in: header
+ *           name: x-api-key
+ *           description: API key
+ *           required: true
+ *         - in: header
+ *           name: x-user-id
+ *           description: User ID
+ *           required: true
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 key:
+ *                   type: string
+ *                   description: The key associated with the video to be deleted.
+ *       responses:
+ *         "200":
+ *           description: Video deleted successfully
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Video deleted successfully'
+ *         "401":
+ *           description: Unauthorized. Indicates missing or invalid API key or user ID.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Invalid API key or user ID. Please provide valid credentials.'
+ *         "404":
+ *           description: Not Found. Indicates no video found with the provided key.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'No video found with the specified key.'
+ *         "500":
+ *           description: Internal Server Error. Indicates a server error.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Internal Server Error. Please try again later.'
+ */
 router.delete("/api/delete-video/", deleteVideoAndThumbnail);
+
+/**
+ * @swagger
+ * paths:
+ *   /api/destroy-videouploadFiless-folder/:
+ *     delete:
+ *       tags:
+ *         - VIDEOS
+ *       summary: DANGER ZONE -  Destroy video upload folder
+ *       description: |
+ *         **DANGER ZONE - IRREVERSIBLE OPERATION!**
+
+ *         Delete the entire video upload folder associated with the user. This operation is irreversible and will result in the deletion of all videos uploaded by the user. Use with caution.
+
+ *         The operation requires the following headers: `x-api-key` and `x-user-id`.
+
+ *       security:
+ *         - ApiKeyAuth: []
+ *         - UserIdAuth: []
+ *       parameters:
+ *         - in: header
+ *           name: x-api-key
+ *           description: API key
+ *           required: true
+ *         - in: header
+ *           name: x-user-id
+ *           description: User ID
+ *           required: true
+ *       responses:
+ *         "200":
+ *           description: Video upload folder destroyed successfully
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Video upload folder destroyed successfully'
+ *         "401":
+ *           description: Unauthorized. Indicates missing or invalid API key or user ID.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Invalid API key or user ID. Please provide valid credentials.'
+ *         "404":
+ *           description: Not Found. Indicates no video upload folder found for the provided user.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'No video upload folder found for the specified user.'
+ *         "500":
+ *           description: Internal Server Error. Indicates a server error.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Internal Server Error. Please try again later.'
+ */
 router.delete("/api/destroy-videouploadFiless-folder/", deletevideosContainer);
 
 //danger zone " user file"

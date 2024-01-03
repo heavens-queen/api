@@ -29,13 +29,13 @@ contact:{
   email:"ayiendaglen@gmail.com"
 },
  license: {
-        name: "MIT",
+        name: " LICENSE MIT",
         url: "https://mediaglens.com/Licence"
      
     },
   },
     externalDocs: {
-      description: "**VIEW CODE EXAMPLES**",
+      description: `**VIEW CODE EXAMPLES**`,
       url: "https://path-to-your-documentation/code-examples",
     },
     servers: [
