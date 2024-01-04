@@ -12,6 +12,7 @@ import { deleteVideoAndThumbnail } from "../VIDEOS/deleteVideo/deleteVideo.js";
 import { deletevideosContainer } from "../VIDEOS/deleteVideo/DestroVideoContainer.js";
 import { uploadFiles } from "../DOCS/Upload/index.js";
 import { deleteFilesDocs } from "../DOCS/DeleteFilesDocs/index.js";
+import { destroyFileDocsContainer } from "../DOCS/DestroyFileDocContainer/index.js";
 // import { registerUser } from "../Controllers/auth/Signup.js";
 // import { loginUser } from "../Controllers/auth/login.js";
 // import { getAllUsers } from "../Controllers/users/getAllUsers.js";
@@ -435,7 +436,174 @@ router.delete("/api/destroy-videouploadFiless-folder/", deletevideosContainer);
 router.delete("/api/destroy-User-folder/", deleteUsersFiles);
 
 ///docs/pdfs/ppts upload
+/**
+ * @swagger
+ * paths:
+ *   /api/upload-files/:
+ *     put:
+ *       tags:
+ *         - FILES
+ *       summary: Upload files/docx/pdfs/ppts
+ *       description: Upload files (pdf, docx, png, xlsx, ppts) to the server. Supports multiple file uploads.
+ *       security:
+ *         - ApiKeyAuth: []
+ *         - UserIdAuth: []
+ *       parameters:
+ *         - in: header
+ *           name: x-api-key
+ *           description: API key
+ *           required: true
+ *         - in: header
+ *           name: x-user-id
+ *           description: User ID
+ *           required: true
+ *       requestBody:
+ *         content:
+ *           multipart/form-data:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 files:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                     format: binary blob
+ *       responses:
+ *         "200":
+ *           description: Files uploaded successfully. Returns URL for the zip file or individual file URL.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Files uploaded successfully'
+ *                 url: '/api/files/zip/your-zip-filename.zip'  # URL for the zip file
+ *         "401":
+ *           description: Unauthorized. Indicates missing or invalid API key or user ID.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Invalid API key or user ID. Please provide valid credentials.'
+ *         "404":
+ *           description: Not Found. Indicates the endpoint is not found.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Endpoint not found.'
+ *         "400":
+ *           description: Bad Request. Indicates invalid file types or other parameters.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Invalid file types. Supported types: pdf, docx, png, xlsx, ppts.'
+ *         "500":
+ *           description: Internal Server Error. Indicates a server error.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Internal Server Error. Please try again later.'
+ */
 router.put("/api/upload-files/", storeTemp.array("files"), uploadFiles);
-router.delete("/api/delete-file-docs/",  deleteFilesDocs);
+
+/**
+ * @swagger
+ * paths:
+ *   /api/delete-file/:
+ *     delete:
+ *       tags:
+ *         - FILES
+ *       summary: Delete files
+ *       description: Delete files associated with the provided key. Requires the key obtained during file upload.
+ *       security:
+ *         - ApiKeyAuth: []
+ *         - UserIdAuth: []
+ *       parameters:
+ *         - in: header
+ *           name: x-api-key
+ *           description: API key
+ *           required: true
+ *         - in: header
+ *           name: x-user-id
+ *           description: User ID
+ *           required: true
+ *       requestBody:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 key:
+ *                   type: string
+ *                   description: Key obtained during file upload
+ *                   example: your-upload-key
+ *       responses:
+ *         "200":
+ *           description: Files deleted successfully
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Files deleted successfully'
+ *         "404":
+ *           description: Not Found. Indicates no files found with the given key.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'No files found with the provided key.'
+ *         "500":
+ *           description: Internal Server Error. Indicates a server error.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Internal Server Error. Please try again later.'
+ */
+router.delete("/api/delete-file/", deleteFilesDocs);
+
+
+/**
+ * @swagger
+ * paths:
+ *   /api/destroy-file-container/:
+ *     delete:
+ *       tags:
+ *         - FILES
+ *       summary: Destroy file container
+ *       description: Danger Zone - Irreversibly deletes all files in the user's documents container. Requires the API key and user ID.
+ *       security:
+ *         - ApiKeyAuth: []
+ *         - UserIdAuth: []
+ *       parameters:
+ *         - in: header
+ *           name: x-api-key
+ *           description: API key
+ *           required: true
+ *         - in: header
+ *           name: x-user-id
+ *           description: User ID
+ *           required: true
+ *       responses:
+ *         "200":
+ *           description: File container destroyed successfully
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'File container destroyed successfully'
+ *         "404":
+ *           description: Not Found. Indicates no files found for the user.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'No files found for the provided user.'
+ *         "500":
+ *           description: Internal Server Error. Indicates a server error.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Internal Server Error. Please try again later.'
+ *         "401":
+ *           description: Unauthorized. Indicates missing or invalid API key or user ID.
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: 'Invalid API key or user ID. Please provide valid credentials.'
+ */
+router.delete("/api/destroy-file-container/",  destroyFileDocsContainer);
 
 export default router;

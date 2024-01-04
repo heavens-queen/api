@@ -4,7 +4,7 @@ import { s3 } from "../../config/s3Config.js";
 import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { listObjectsWithPrefix } from "../../IMAGES/Delete/helper/SinglePrefixObjects.js";
 
-export const deleteFileDocsContainer=async(req:Request,res:Response,next:NextFunction)=>{
+export const destroyFileDocsContainer=async(req:Request,res:Response,next:NextFunction)=>{
     const userId=req.query.userId;
     try{
 
