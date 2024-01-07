@@ -1,0 +1,12 @@
+version: "3.4"
+
+services:
+  mediaglens:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: glennin/mediaglen:latest # Specify the desired image name
+    environment:
+      NODE_ENV: production
+    ports:
+      - 8080:8080
